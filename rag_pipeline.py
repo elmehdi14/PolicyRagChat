@@ -6,6 +6,7 @@ import numpy as np
 from dotenv import load_dotenv
 import os
 import streamlit as st
+from mistralai.models import SDKError
 
 
 # Load environment variables from .env file
