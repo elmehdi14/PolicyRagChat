@@ -17,6 +17,7 @@ def rag_pipeline(url):
     """
     # Get the API key from the environment
     api_key = st.secrets["MISTRAL_API_KEY"]
+    print(api_key)
     if not api_key:
         raise ValueError("MISTRAL_API_KEY not found in .env file.")
     
