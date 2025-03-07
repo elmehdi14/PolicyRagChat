@@ -15,7 +15,7 @@ def rag_pipeline(url):
     RAG pipeline: Load policy text, chunk it, generate embeddings, and create a FAISS index.
     """
     # Get the API key from the environment
-    api_key = os.getenv("MISTRAL_API_KEY")
+    api_key = st.secrets["MISTRAL_API_KEY"]
     if not api_key:
         raise ValueError("MISTRAL_API_KEY not found in .env file.")
     
