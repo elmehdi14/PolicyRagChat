@@ -2,7 +2,6 @@ import streamlit as st
 from rag_pipeline import rag_pipeline, process_query
 from dotenv import load_dotenv
 import os
-from mistralai.models import SDKError
 
 # Load environment variables from .env file
 load_dotenv()
