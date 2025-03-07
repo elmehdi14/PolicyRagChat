@@ -75,20 +75,29 @@ def process_query(query, index, text_chunks, api_key):
     """
     Process a user query: retrieve relevant chunks and generate an answer.
     """
-    # Generate embedding for the query
-    query_embedding = np.array([get_text_embeddings([query], api_key)[0]])
+    try:
+        # Generate embedding for the query
+        query_embedding = np.array([get_text_embeddings([query], api_key)[0]])
+        
+        # Search for relevant chunks
+        D, I = index.search(query_embedding, k=2)  # Retrieve top 2 chunks
+        retrieved_chunks = [text_chunks[i] for i in I.tolist()[0]]
+        
+        # Generate answer using MistralAI
+        client = Mistral(api_key=api_key)
+        prompt = f"Context: {retrieved_chunks}\\nQuery: {query}\\nAnswer:"
+        print("Prompt:", prompt)  # Debugging: Check the prompt content
+        
+        response = client.chat.complete(
+            model="mistral-large-latest",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        return response.choices[0].message.content
     
-    # Search for relevant chunks
-    D, I = index.search(query_embedding, k=2)  # Retrieve top 2 chunks
-    retrieved_chunks = [text_chunks[i] for i in I.tolist()[0]]
-    
-    # Generate answer using MistralAI
-    client = Mistral(api_key=api_key)
-    prompt = f"Context: {retrieved_chunks}\\nQuery: {query}\\nAnswer:"
-    response = client.chat.complete(
-        model="mistral-large-latest",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    if not response:
-        return "Sorry this can't be answered due to lack of information or policy violation!"
-    return response.choices[0].message.content
+    except SDKError as e:
+        print(f"MistralAI SDK Error: {e}")
+        return "An error occurred with the MistralAI API."
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return "An unexpected error occurred."
