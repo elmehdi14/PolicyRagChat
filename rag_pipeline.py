@@ -131,7 +131,7 @@ def process_query(query, index, text_chunks, api_key):
     
     except SDKError as e:
         print(f"MistralAI SDK Error: {e}")
-        return "Your query isn't related to UDST policies."
+        return "An error occurred due to exceeding high Requests rate limit, try again in a couple of minutes !!"
     except Exception as e:
         print(f"Unexpected error: {e}")
         return "An unexpected error occurred try again in a couple of minutes."
