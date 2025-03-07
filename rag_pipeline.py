@@ -89,4 +89,6 @@ def process_query(query, index, text_chunks, api_key):
         model="mistral-large-latest",
         messages=[{"role": "user", "content": prompt}]
     )
+    if not response:
+        return "Sorry this can't be answered due to lack of information or policy violation!"
     return response.choices[0].message.content
