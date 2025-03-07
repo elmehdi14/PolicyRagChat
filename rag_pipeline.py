@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 import streamlit as st
 from mistralai.models import SDKError
+import time
 
 
 # Load environment variables from .env file
@@ -52,16 +53,48 @@ def chunk_text(text, chunk_size=512):
     """
     return [text[i : i + chunk_size] for i in range(0, len(text), chunk_size)]
 
-def get_text_embeddings(text_chunks, api_key):
+def get_text_embeddings(text_chunks, api_key, max_retries=3, retry_delay=5):
     """
     Generate embeddings for a list of text chunks using MistralAI.
+    
+    Args:
+        text_chunks (list): List of text chunks to generate embeddings for.
+        api_key (str): MistralAI API key.
+        max_retries (int): Maximum number of retries for rate limit errors.
+        retry_delay (int): Delay (in seconds) between retries.
+    
+    Returns:
+        list: List of embeddings for the input text chunks.
     """
     client = Mistral(api_key=api_key)
-    embeddings_batch_response = client.embeddings.create(
-        model="mistral-embed",
-        inputs=text_chunks
-    )
-    return [embedding.embedding for embedding in embeddings_batch_response.data]
+    
+    for attempt in range(max_retries):
+        try:
+            # Attempt to generate embeddings
+            embeddings_batch_response = client.embeddings.create(
+                model="mistral-embed",
+                inputs=text_chunks
+            )
+            # Return the embeddings
+            return [embedding.embedding for embedding in embeddings_batch_response.data]
+        
+        except SDKError as e:
+            # Handle rate limit errors (status code 429)
+            if "Status 429" in str(e):
+                print(f"Rate limit exceeded. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                time.sleep(retry_delay)  # Wait before retrying
+            else:
+                # Re-raise the error if it's not a rate limit issue
+                print(f"MistralAI API error: {e}")
+                raise e
+        
+        except Exception as e:
+            # Handle other unexpected errors
+            print(f"Unexpected error: {e}")
+            raise e
+    
+    # If all retries fail, raise an exception
+    raise Exception(f"Failed to generate embeddings after {max_retries} retries due to rate limiting.")
 
 def create_faiss_index(embeddings):
     """
