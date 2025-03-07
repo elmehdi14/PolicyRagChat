@@ -98,7 +98,7 @@ def process_query(query, index, text_chunks, api_key):
     
     except SDKError as e:
         print(f"MistralAI SDK Error: {e}")
-        return "An error occurred with the MistralAI API."
+        return "Your query isn't related to UDST policies."
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return "An unexpected error occurred."
+        return "An unexpected error occurred try again in a couple of minutes."
