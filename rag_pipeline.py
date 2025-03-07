@@ -5,6 +5,7 @@ import faiss
 import numpy as np
 from dotenv import load_dotenv
 import os
+import streamlit as st
 
 
 # Load environment variables from .env file
