@@ -90,21 +90,3 @@ def process_query(query, index, text_chunks, api_key):
         messages=[{"role": "user", "content": prompt}]
     )
     return response.choices[0].message.content
-
-def rag_pipeline(url, api_key):
-    """
-    RAG pipeline: Load policy text, chunk it, generate embeddings, and create a FAISS index.
-    """
-    # Step 1: Load policy text
-    policy_text = load_policy_text(url)
-    
-    # Step 2: Chunk the text
-    text_chunks = chunk_text(policy_text)
-    
-    # Step 3: Generate embeddings
-    embeddings = get_text_embeddings(text_chunks, api_key)
-    
-    # Step 4: Create FAISS index
-    index = create_faiss_index(embeddings)
-    
-    return index, text_chunks
